@@ -77,6 +77,7 @@ def test_oauth_pkce_state_is_single_use_and_bound_to_session_and_provider(client
     assert query["code_challenge_method"] == ["S256"]
     assert query["redirect_uri"] == [settings.base_url + "/oauth/google/callback"]
     assert query["access_type"] == ["offline"]
+    assert query["scope"] == ["openid email https://www.googleapis.com/auth/calendar.events"]
     state = query["state"][0]
     store = client.app.state.store
     session = store.session(client.cookies["ocs_session"])

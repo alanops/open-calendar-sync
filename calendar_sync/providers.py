@@ -11,8 +11,7 @@ from .models import Event
 PROPERTY = "String {18f894bd-7ff8-4d0b-9b2f-69e945c550e9} Name OpenCalendarSync"
 MARKER_NAME = "openCalendarSync"
 SCOPES = {
-    "google": "openid email https://www.googleapis.com/auth/calendar.events "
-    "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
+    "google": "openid email https://www.googleapis.com/auth/calendar.events",
     "microsoft": "openid offline_access User.Read Calendars.ReadWrite",
 }
 ROOTS = {"google": "https://www.googleapis.com/calendar/v3", "microsoft": "https://graph.microsoft.com/v1.0"}
@@ -52,10 +51,7 @@ async def exchange(settings, provider, code, verifier):
         token = dict(await client.fetch_token(endpoint, code=code, code_verifier=verifier))
     scopes = set(token.get("scope", "").lower().split())
     needed = (
-        {
-            "https://www.googleapis.com/auth/calendar.events",
-            "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
-        }
+        {"https://www.googleapis.com/auth/calendar.events"}
         if provider == "google"
         else {"calendars.readwrite", "user.read"}
     )
@@ -113,6 +109,11 @@ class Calendar:
         ):
             raise ProviderError("Provider returned an unexpected pagination address.")
         token = await self.access_token()
+        default_headers = (
+            {"Prefer": 'outlook.timezone="UTC", outlook.body-content-type="text"'}
+            if self.provider == "microsoft"
+            else {}
+        )
         for attempt in range(4):
             try:
                 async with httpx.AsyncClient(timeout=30, transport=self.transport) as client:
@@ -121,11 +122,13 @@ class Calendar:
                         url,
                         params=params,
                         json=body,
-                        headers={"Authorization": f"Bearer {token}", **(headers or {})},
+                        headers={"Authorization": f"Bearer {token}", **default_headers, **(headers or {})},
                     )
             except httpx.HTTPError as exc:
                 # The next cycle recovers interrupted writes by marker and durable intent.
-                raise ProviderError("Calendar service could not be reached. No cleanup will run.") from exc
+                raise ProviderError(
+                    "Calendar service could not be reached. Sync will retry next cycle."
+                ) from exc
             if response.status_code == 401 and attempt == 0:
                 token = await self.access_token(force=True)
                 continue

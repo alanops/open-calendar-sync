@@ -14,7 +14,7 @@ For local setup, `BASE_URL=http://localhost:8000`. For HTTPS hosting, use your o
 4. Put the client ID and secret into `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env` and restart the server.
 5. Sign into the dashboard, choose **Connect Google**, select an account and review the permissions. Repeat for every Google account.
 
-Requested scopes: `openid`, `email`, `https://www.googleapis.com/auth/calendar.events` and `https://www.googleapis.com/auth/calendar.calendarlist.readonly`. No Gmail, contacts or Drive permissions are requested. Workspace administrators may need to allow the app.
+Requested scopes: `openid`, `email` and `https://www.googleapis.com/auth/calendar.events`. No calendar-list, Gmail, contacts or Drive permissions are requested. Workspace administrators may need to allow the app.
 
 Google external apps in **Testing** mode generally receive refresh tokens that expire after seven days for calendar scopes. For unattended use, complete the appropriate publishing/verification setup. Do not represent an unverified app as verified or bypass organization restrictions. See Google's [OAuth web-server flow](https://developers.google.com/identity/protocols/oauth2/web-server) and [refresh-token expiration rules](https://developers.google.com/identity/protocols/oauth2#expiration).
 

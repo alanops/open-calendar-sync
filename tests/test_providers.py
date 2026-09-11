@@ -81,6 +81,7 @@ async def test_created_copy_contains_only_busy_time_and_no_invitations(provider,
         assert calls[0].url.params["sendUpdates"] == "none"
         assert body["id"] == "a" * 32
     else:
+        assert calls[0].headers["Prefer"] == 'outlook.timezone="UTC", outlook.body-content-type="text"'
         assert body["subject"] == "Busy" and body["sensitivity"] == "private"
         assert body["start"] == {"dateTime": "2026-10-24T09:00:00", "timeZone": "UTC"}
         assert body["transactionId"] == "a" * 32
