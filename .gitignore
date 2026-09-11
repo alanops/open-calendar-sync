@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+.venv/
+data/
+*.db*
+*.sqlite*
+*.key
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+coverage.xml
+.coverage

@@ -1,0 +1,4 @@
+# Replace this example hostname and set BASE_URL to the matching HTTPS origin.
+calendar.example.com {
+    reverse_proxy 127.0.0.1:8000
+}

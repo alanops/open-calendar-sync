@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="Private, self-hosted busy-time syncing for Google and Microsoft 365 calendars."
+    />
+    <title>Open Calendar Sync · AlanOps</title>
+    <link rel="icon" href="/static/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Open Calendar Sync home"
+        ><span class="brand-icon">⇄</span
+        ><span>Open Calendar Sync<small>BY ALANOPS</small></span></a
+      >
+      <div class="top-actions">
+        <a
+          href="https://github.com/alanops/open-calendar-sync"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Source code ↗</a
+        ><button id="logout" class="text-button" hidden>Sign out</button>
+      </div>
+    </header>
+    <main>
+      <section id="login-panel" class="login-panel" hidden>
+        <span class="eyebrow">YOUR TIME, CONNECTED</span>
+        <h1>One schedule.<br />Every calendar.</h1>
+        <p>
+          Keep your availability aligned across Google and Microsoft 365. Your
+          meeting details stay in their original calendar.
+        </p>
+        <form id="login-form">
+          <label for="access-key">Dashboard access key</label
+          ><input
+            id="access-key"
+            type="password"
+            autocomplete="current-password"
+            required
+            maxlength="512"
+            placeholder="Enter your private access key"
+          /><button class="primary" type="submit">
+            Open my dashboard <span>→</span>
+          </button>
+        </form>
+        <p class="hint">
+          Self-hosting? Your access key is the ADMIN_TOKEN in your server’s .env
+          file.
+        </p>
+        <div class="login-foot">
+          <span>MIT licensed</span><span>No subscription</span
+          ><span>Self-hosted</span>
+        </div>
+      </section>
+      <section id="dashboard" hidden>
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">AVAILABILITY WORKSPACE</span>
+            <h1>Your calendars, in step.</h1>
+            <p>Busy in one place. Protected everywhere.</p>
+          </div>
+          <span id="sync-badge" class="badge">Checking status</span>
+        </div>
+        <div class="stats">
+          <div>
+            <span>Connected calendars</span
+            ><strong id="account-count">0</strong>
+          </div>
+          <div>
+            <span>Managed busy blocks</span><strong id="copy-count">0</strong>
+          </div>
+          <div>
+            <span>Sync window</span
+            ><strong
+              ><span id="horizon">90</span><small> days ahead</small></strong
+            >
+          </div>
+        </div>
+        <div class="workspace-grid">
+          <section class="panel accounts-panel">
+            <div class="section-heading">
+              <div>
+                <span class="step">01</span>
+                <h2>Connect your calendars</h2>
+              </div>
+              <span class="subtle">Primary calendars</span>
+            </div>
+            <div id="accounts" class="accounts"></div>
+            <div id="empty-state" class="empty-state">
+              <div class="empty-symbol">▦ <span>⇄</span> ▦</div>
+              <h3>A little less calendar juggling.</h3>
+              <p>
+                Connect two or more accounts to keep busy time in sync. You can
+                add multiple Google and Microsoft accounts.
+              </p>
+            </div>
+            <div class="connect-buttons">
+              <button id="connect-google" class="provider-button">
+                <span class="google-icon">G</span> Connect Google</button
+              ><button id="connect-microsoft" class="provider-button">
+                <span class="microsoft-icon">⊞</span> Connect Microsoft
+              </button>
+            </div>
+            <p id="provider-setup" class="hint" hidden></p>
+          </section>
+          <aside class="panel sync-panel">
+            <div class="section-heading">
+              <div>
+                <span class="step">02</span>
+                <h2>Keep time protected</h2>
+              </div>
+            </div>
+            <div class="privacy-setting">
+              <span class="privacy-icon">◈</span>
+              <div>
+                <strong>Busy time only</strong>
+                <p>
+                  Private blocks. No titles, guests, meeting links or
+                  notifications.
+                </p>
+              </div>
+              <span class="check">✓</span>
+            </div>
+            <div class="sync-facts">
+              <div>
+                <span>Direction</span
+                ><strong>Every selected calendar ↔</strong>
+              </div>
+              <div>
+                <span>Automatic check</span
+                ><strong id="interval">Every 5 minutes</strong>
+              </div>
+              <div>
+                <span>Original events</span><strong>Never edited</strong>
+              </div>
+            </div>
+            <button id="preview" class="secondary">Preview busy blocks</button>
+            <p id="preview-result" class="hint" aria-live="polite">
+              Preview reads your calendars without changing them.
+            </p>
+            <button id="toggle-sync" class="primary">
+              Start automatic sync <span>→</span></button
+            ><button id="sync-now" class="text-button full">Sync now</button>
+          </aside>
+        </div>
+        <section class="panel activity-panel">
+          <div class="section-heading">
+            <div>
+              <span class="step">03</span>
+              <h2>Recent activity</h2>
+            </div>
+            <button id="refresh" class="text-button">Refresh ↻</button>
+          </div>
+          <div id="activity">
+            <p class="hint">Your first sync will appear here.</p>
+          </div>
+        </section>
+        <p class="footer-note">
+          Free software. Your server. Your calendar data.
+          <a
+            href="https://github.com/alanops/open-calendar-sync/blob/main/docs/self-hosting.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Self-hosting guide ↗</a
+          >
+        </p>
+      </section>
+      <div
+        id="notice"
+        class="notice"
+        role="status"
+        aria-live="polite"
+        hidden
+      ></div>
+      <noscript
+        ><p>
+          This dashboard needs JavaScript to connect and manage your calendars.
+        </p></noscript
+      >
+    </main>
+    <dialog id="disconnect-dialog">
+      <h2>Disconnect this account?</h2>
+      <p>
+        This pauses syncing and removes all Busy copies created by this
+        installation across your calendars. Original events stay untouched. You
+        can resume syncing the remaining accounts afterwards.
+      </p>
+      <p id="disconnect-email"></p>
+      <div class="dialog-actions">
+        <button id="cancel-disconnect" class="secondary">Keep connected</button
+        ><button id="confirm-disconnect" class="danger">
+          Disconnect & clean up
+        </button>
+      </div>
+    </dialog>
+  </body>
+</html>

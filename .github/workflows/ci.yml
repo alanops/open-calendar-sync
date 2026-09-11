@@ -1,0 +1,43 @@
+name: Tests and container
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install -r requirements.lock && pip install -e '.[dev]'
+      - run: ruff check . && ruff format --check .
+      - run: pytest -q
+      - run: node --check calendar_sync/static/app.js
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t open-calendar-sync:test .
+      - name: Smoke test container
+        shell: bash
+        run: |
+          ADMIN_TOKEN=$(openssl rand -hex 32)
+          ENCRYPTION_KEY=$(openssl rand -base64 32 | tr '+/' '-_')
+          docker run -d --name sync-test -p 127.0.0.1:8000:8000 \
+            -e BASE_URL=http://localhost:8000 -e ADMIN_TOKEN="$ADMIN_TOKEN" \
+            -e ENCRYPTION_KEY="$ENCRYPTION_KEY" open-calendar-sync:test
+          for attempt in {1..20}; do
+            if curl -fsS http://localhost:8000/healthz; then exit 0; fi
+            sleep 2
+          done
+          docker logs sync-test
+          exit 1
